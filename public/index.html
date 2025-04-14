@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ask for a Video</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 2em;
+      background: #f8f8f8;
+    }
+    input[type="text"] {
+      font-size: 1.5em;
+      width: 80%;
+      max-width: 600px;
+      padding: 0.5em;
+    }
+    iframe {
+      margin-top: 2em;
+      width: 80%;
+      max-width: 720px;
+      height: 405px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <input type="text" id="prompt" placeholder="Ask for a video..." oninput="debouncedFetchVideo()" x-webkit-speech>
 
+  <div id="video"></div>
+
+  <script>
+    let timeout;
+
+    function debouncedFetchVideo() {
+      clearTimeout(timeout);
+      timeout = setTimeout(fetchVideo, 1000);
+    }
+
+    async function fetchVideo() {
+      const prompt = document.getElementById('prompt').value.trim();
+      if (!prompt) return;
+
+      const response = await fetch("/api/gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
+
+      if (match) {
+        const videoId = new URL(match[1]).searchParams.get("v");
+        document.getElementById('video').innerHTML =
+          `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+      } else {
+        document.getElementById('video').innerHTML = "<p>No valid video found.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
