@@ -42,36 +42,44 @@
   
   <div id="video"></div>
 
-  <script>
-    let timeout;
+<script>
+  let timeout;
 
-    function debouncedFetchVideo() {
-      clearTimeout(timeout);
-      timeout = setTimeout(fetchVideo, 1000);
+  function debouncedFetchVideo() {
+    clearTimeout(timeout);
+    timeout = setTimeout(fetchVideo, 1000);
+  }
+
+  function handleKeyPress(event) {
+    if (event.key === "Enter") {
+      clearTimeout(timeout); // cancel debounce
+      fetchVideo(); // submit immediately
     }
+  }
 
-    async function fetchVideo() {
-      const prompt = document.getElementById('prompt').value.trim();
-      if (!prompt) return;
+  async function fetchVideo() {
+    const prompt = document.getElementById('prompt').value.trim();
+    if (!prompt) return;
 
-      const response = await fetch("/api/gpt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
+    const response = await fetch("/api/gpt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
 
-      const data = await response.json();
-      const text = data.choices?.[0]?.message?.content || "";
-      const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || "";
+    const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
 
-      if (match) {
-        const videoId = new URL(match[1]).searchParams.get("v");
-        document.getElementById('video').innerHTML =
-          `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
-      } else {
-        document.getElementById('video').innerHTML = "<p>No valid video found.</p>";
-      }
+    if (match) {
+      const videoId = new URL(match[1]).searchParams.get("v");
+      document.getElementById('video').innerHTML =
+        `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+    } else {
+      document.getElementById('video').innerHTML = "<p>No valid video found.</p>";
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
