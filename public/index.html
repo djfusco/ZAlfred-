@@ -67,50 +67,47 @@
       }
     }
 
-    async function fetchVideo() {
-      const prompt = document.getElementById('prompt').value.trim();
-      const statusEl = document.getElementById('status');
-      const videoEl = document.getElementById('video');
+  async function fetchVideo() {
+  const prompt = document.getElementById('prompt').value.trim();
+  const statusEl = document.getElementById('status');
+  const videoEl = document.getElementById('video');
 
-      if (!prompt) return;
+  if (!prompt) return;
 
-      statusEl.innerText = "🎤 Asking ChatGPT...";
-      videoEl.innerHTML = "";
+  statusEl.innerText = "🎤 Asking ChatGPT...";
+  videoEl.innerHTML = "";
 
-      try {
-        const response = await fetch("/api/gpt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt })
-        });
+  try {
+    const response = await fetch("/api/gpt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
 
-        const rawText = await response.text();
-        console.log("Raw response from API:", rawText);
-
-        let data;
-        try {
-          data = JSON.parse(rawText);
-        } catch (e) {
-          statusEl.innerText = "❌ API response was not valid JSON.";
-          console.error("JSON parse error:", e);
-          return;
-        }
-
-        const content = data.message?.content || "";
-        const match = content.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
-
-        if (match) {
-          const videoId = new URL(match[1]).searchParams.get("v");
-          videoEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
-          statusEl.innerText = "";
-        } else {
-          statusEl.innerText = "⚠️ No valid YouTube video found.";
-        }
-      } catch (err) {
-        console.error("Error fetching video:", err);
-        statusEl.innerText = "❌ Error fetching video. See console.";
-      }
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      const text = await response.text();
+      throw new Error(`Expected JSON, got: ${text}`);
     }
+
+    const data = await response.json();
+
+    const text = data.message?.content || "";
+    const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
+
+    if (match) {
+      const videoId = new URL(match[1]).searchParams.get("v");
+      videoEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+      statusEl.innerText = "";
+    } else {
+      statusEl.innerText = "⚠️ No valid YouTube video found.";
+    }
+  } catch (err) {
+    console.error("Error fetching video:", err);
+    statusEl.innerText = "❌ Error: " + err.message;
+  }
+}
+
   </script>
 </body>
 </html>
