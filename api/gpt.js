@@ -1,9 +1,10 @@
-const { Configuration, OpenAIApi } = require("openai");
+// Updated to use the new OpenAI SDK
+const OpenAI = require("openai");
 
-const configuration = new Configuration({
+// Initialize the OpenAI client
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -21,7 +22,7 @@ module.exports = async function handler(req, res) {
 User request: "${userPrompt}"`;
 
   try {
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: "You are a helpful assistant that finds family-safe YouTube videos." },
@@ -31,7 +32,7 @@ User request: "${userPrompt}"`;
       max_tokens: 150,
     });
 
-    res.status(200).json(completion.data);
+    res.status(200).json(completion.data.choices[0]);
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: "OpenAI error", details: err.message });
