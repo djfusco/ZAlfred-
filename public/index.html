@@ -96,9 +96,8 @@
           return;
         }
 
-        const text = data.choices?.[0]?.message?.content || "";
-        const text = data.message?.content || "";
-        const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
+        const content = data.message?.content || "";
+        const match = content.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
 
         if (match) {
           const videoId = new URL(match[1]).searchParams.get("v");
