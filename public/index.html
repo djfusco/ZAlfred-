@@ -30,8 +30,16 @@
   </style>
 </head>
 <body>
-  <input type="text" id="prompt" placeholder="Ask for a video..." oninput="debouncedFetchVideo()" x-webkit-speech>
-
+  <input
+    type="text"
+    id="prompt"
+    placeholder="Ask for a video..."
+    oninput="debouncedFetchVideo()"
+    onkeypress="handleKeyPress(event)"
+    x-webkit-speech
+    autocomplete="off"
+  />
+  
   <div id="video"></div>
 
   <script>
