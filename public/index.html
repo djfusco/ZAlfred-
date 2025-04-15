@@ -14,12 +14,14 @@
       padding: 2em;
       background: #f8f8f8;
     }
+
     input[type="text"] {
       font-size: 1.5em;
       width: 80%;
       max-width: 600px;
       padding: 0.5em;
     }
+
     iframe {
       margin-top: 2em;
       width: 80%;
@@ -27,6 +29,7 @@
       height: 405px;
       border: none;
     }
+
     #status {
       margin-top: 1em;
       font-size: 1em;
@@ -48,68 +51,66 @@
   <div id="status"></div>
   <div id="video"></div>
 
-<script>
-  let timeout;
+  <script>
+    let timeout;
 
-  function debouncedFetchVideo() {
-    clearTimeout(timeout);
-    timeout = setTimeout(fetchVideo, 1000);
-  }
-
-  function handleKeyDown(event) {
-    if (event.key === "Enter") {
-      event.preventDefault();  // Stop Enter from reloading
-      clearTimeout(timeout);   // Cancel debounce
-      fetchVideo();            // Trigger fetch
+    function debouncedFetchVideo() {
+      clearTimeout(timeout);
+      timeout = setTimeout(fetchVideo, 1000);
     }
-  }
 
-  async function fetchVideo() {
-    const prompt = document.getElementById('prompt').value.trim();
-    const statusEl = document.getElementById('status');
-    const videoEl = document.getElementById('video');
+    function handleKeyDown(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        clearTimeout(timeout);
+        fetchVideo();
+      }
+    }
 
-    if (!prompt) return;
+    async function fetchVideo() {
+      const prompt = document.getElementById('prompt').value.trim();
+      const statusEl = document.getElementById('status');
+      const videoEl = document.getElementById('video');
 
-    statusEl.innerText = "🎤 Asking ChatGPT...";
-    videoEl.innerHTML = "";
+      if (!prompt) return;
 
-    try {
-      const response = await fetch("/api/gpt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
+      statusEl.innerText = "🎤 Asking ChatGPT...";
+      videoEl.innerHTML = "";
 
+      try {
+        const response = await fetch("/api/gpt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
 
-        const text = await response.text();
-        console.log("Raw response from API:", text);
-        
+        const rawText = await response.text();
+        console.log("Raw response from API:", rawText);
+
         let data;
         try {
-          data = JSON.parse(text);
+          data = JSON.parse(rawText);
         } catch (e) {
-          document.getElementById('status').innerText = "❌ API response was not valid JSON.";
+          statusEl.innerText = "❌ API response was not valid JSON.";
           console.error("JSON parse error:", e);
           return;
         }
 
-      const text = data.choices?.[0]?.message?.content || "";
-      const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
+        const text = data.choices?.[0]?.message?.content || "";
+        const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
 
-      if (match) {
-        const videoId = new URL(match[1]).searchParams.get("v");
-        videoEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
-        statusEl.innerText = "";
-      } else {
-        statusEl.innerText = "⚠️ No valid YouTube video found.";
+        if (match) {
+          const videoId = new URL(match[1]).searchParams.get("v");
+          videoEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+          statusEl.innerText = "";
+        } else {
+          statusEl.innerText = "⚠️ No valid YouTube video found.";
+        }
+      } catch (err) {
+        console.error("Error fetching video:", err);
+        statusEl.innerText = "❌ Error fetching video. See console.";
       }
-    } catch (err) {
-      console.error("Error fetching video:", err);
-      statusEl.innerText = "❌ Error fetching video. See console.";
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
