@@ -40,16 +40,17 @@ export default async function handler(req, res) {
 
   const userPrompt = req.body.prompt;
 
-    const safePrompt = `Please respond with only a single YouTube video URL that is:
-  - embeddable (does not block embedding)
-  - family-friendly
-  - educational or informative
-  - appropriate for all ages
-  - not political, violent, or sensitive
-  
-  User request: "${userPrompt}"`;
-  
-  
+  const safePrompt = `Please respond with only a single YouTube video URL that is:
+- embeddable (does not block embedding)
+- family-friendly
+- educational or informative
+- appropriate for all ages
+- not political, violent, or sensitive
+
+Only include the direct YouTube video URL in your response — do not add any description, explanation, or formatting.
+
+User request: "${userPrompt}"`;
+
     
 
   try {
