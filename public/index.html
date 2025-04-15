@@ -97,6 +97,7 @@
         }
 
         const text = data.choices?.[0]?.message?.content || "";
+        const text = data.message?.content || "";
         const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
 
         if (match) {
