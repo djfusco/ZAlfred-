@@ -50,10 +50,11 @@
     timeout = setTimeout(fetchVideo, 1000);
   }
 
-  function handleKeyPress(event) {
+  function handleKeyDown(event) {
     if (event.key === "Enter") {
-      clearTimeout(timeout); // cancel debounce
-      fetchVideo(); // submit immediately
+      event.preventDefault();  // Prevent form submission or default action
+      clearTimeout(timeout);   // Cancel any pending debounce
+      fetchVideo();            // Submit immediately
     }
   }
 
