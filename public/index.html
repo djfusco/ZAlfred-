@@ -35,11 +35,11 @@
     id="prompt"
     placeholder="Ask for a video..."
     oninput="debouncedFetchVideo()"
-    onkeypress="handleKeyPress(event)"
+    onkeydown="handleKeyDown(event)"
     x-webkit-speech
     autocomplete="off"
   />
-  
+
   <div id="video"></div>
 
 <script>
