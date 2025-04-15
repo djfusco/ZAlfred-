@@ -34,7 +34,6 @@ User request: "${userPrompt}"`;
     res.status(200).json(completion.data);
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "OpenAI error" });
+    res.status(500).json({ error: "OpenAI error", details: err.message });
   }
 }
-
