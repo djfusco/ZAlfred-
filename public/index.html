@@ -81,7 +81,19 @@
         body: JSON.stringify({ prompt })
       });
 
-      const data = await response.json();
+
+        const text = await response.text();
+        console.log("Raw response from API:", text);
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          document.getElementById('status').innerText = "❌ API response was not valid JSON.";
+          console.error("JSON parse error:", e);
+          return;
+        }
+
       const text = data.choices?.[0]?.message?.content || "";
       const match = text.match(/(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)/);
 
