@@ -1,12 +1,39 @@
-// Updated to use the new OpenAI SDK
-const OpenAI = require("openai");
+// file: gpt.js
+// Updated for ESM format with current OpenAI SDK
 
-// Initialize the OpenAI client
+// Change this:
+// import { Configuration, OpenAIApi } from "openai";
+
+// To this ESM import:
+import OpenAI from 'openai';
+
+// Initialize the client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-module.exports = async function handler(req, res) {
+// Export any functions you need
+export async function createCompletion(prompt) {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        { role: "system", content: "You are a helpful assistant that finds family-safe YouTube videos." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 150,
+    });
+    
+    return completion.choices[0];
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+}
+
+// If you need to maintain compatibility with your existing API handler
+export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
@@ -32,9 +59,9 @@ User request: "${userPrompt}"`;
       max_tokens: 150,
     });
 
-    res.status(200).json(completion.data.choices[0]);
+    res.status(200).json(completion.choices[0]);
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: "OpenAI error", details: err.message });
   }
-};
+}
