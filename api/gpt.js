@@ -1,11 +1,11 @@
-import { Configuration, OpenAIApi } from "openai";
+const { Configuration, OpenAIApi } = require("openai");
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
@@ -36,4 +36,4 @@ User request: "${userPrompt}"`;
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: "OpenAI error", details: err.message });
   }
-}
+};
